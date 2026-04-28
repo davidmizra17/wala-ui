@@ -1,4 +1,4 @@
-import type { UUID, BaseEntity, Platform } from '@/shared/types'
+import type { BaseEntity, Platform } from '@/shared/types'
 
 export interface Contact extends BaseEntity {
   external_id: string
@@ -8,6 +8,14 @@ export interface Contact extends BaseEntity {
   platform: Platform
   tags: string[]
   notes: string
+  location?: string
+  lastSeen?: string
+  firstContact?: string
+  lastContact?: string
+  conversations?: number
+  deals?: string
+  timeline?: TimelineEvent[]
+  botSuggestion?: string
 }
 
 export interface TimelineEvent {

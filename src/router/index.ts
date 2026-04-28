@@ -25,7 +25,7 @@ const router = createRouter({
       path: '/contacts',
       name: 'contacts',
       component: () => import('@/features/contacts/views/ContactsView.vue'),
-      meta: { layout: 'app', nav: 'contacts' },
+      meta: { layout: 'app', nav: 'contacts', title: 'Contactos', subtitle: '1,204 clientes y prospectos' },
     },
     {
       path: '/tasks',
