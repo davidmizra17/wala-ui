@@ -22,3 +22,9 @@ export interface AgentRow {
   responseTime: string
   closed: number
 }
+
+export interface ChannelData {
+  name: 'WhatsApp' | 'Instagram'
+  count: number
+  pct: number
+}

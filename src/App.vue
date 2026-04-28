@@ -11,7 +11,7 @@ const isAppLayout = computed(() => route.meta.layout === 'app')
 
 <template>
   <Toast position="top-right" />
-  <AppShell v-if="isAppLayout">
+  <AppShell v-if="isAppLayout" :title="route.meta.title as string" :subtitle="route.meta.subtitle as string">
     <RouterView />
   </AppShell>
   <RouterView v-else />

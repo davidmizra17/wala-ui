@@ -13,7 +13,7 @@ const router = createRouter({
       path: '/',
       name: 'dashboard',
       component: () => import('@/features/dashboard/views/DashboardView.vue'),
-      meta: { layout: 'app', nav: 'dashboard' },
+      meta: { layout: 'app', nav: 'dashboard', title: 'Reportes', subtitle: 'Desempeño del negocio' },
     },
     {
       path: '/crm',
