@@ -1,0 +1,90 @@
+/* ── Wala Design Tokens ─────────────────────────────────────────────────── */
+:root,
+[data-theme='light'] {
+  /* Backgrounds */
+  --bg:          #faf7f2;
+  --surface:     #ffffff;
+  --surface-2:   #f4f0e8;
+  --surface-3:   #ede7db;
+
+  /* Text */
+  --ink:         #1a1614;
+  --ink-2:       #5b534a;
+  --ink-3:       #8a8177;
+
+  /* Lines */
+  --line:        rgba(26, 22, 20, 0.08);
+  --line-2:      rgba(26, 22, 20, 0.14);
+
+  /* Accent — amber */
+  --accent:      #F59E0B;
+  --accent-dk:   #D97706;
+  --accent-tint: #FEF3C7;
+  --accent-ink:  #78350F;
+
+  /* Semantic */
+  --good:        #3f8f5c;
+  --good-tint:   #d8ebdf;
+  --warn:        #c8671b;
+  --warn-tint:   #fbe4cc;
+  --bad:         #b3433a;
+  --bad-tint:    #f3d7d4;
+  --info:        #3b6fb3;
+  --info-tint:   #d8e3f2;
+
+  /* Channels */
+  --wa:          #25D366;
+  --ig:          #E1306C;
+
+  /* AI */
+  --ai:          #a06aff;
+  --ai-tint:     #ece2ff;
+
+  /* Shadows */
+  --shadow-sm:   0 1px 2px rgba(60,40,20,0.04), 0 0 0 1px rgba(26,22,20,0.04);
+  --shadow-md:   0 6px 24px -8px rgba(60,40,20,0.12), 0 0 0 1px rgba(26,22,20,0.05);
+  --shadow-lg:   0 18px 48px -16px rgba(60,40,20,0.18), 0 0 0 1px rgba(26,22,20,0.05);
+
+  /* Typography */
+  --font-ui:     'Inter Tight', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-hero:   'Instrument Serif', 'Iowan Old Style', Georgia, serif;
+  --font-mono:   'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Radius */
+  --radius-sm:   6px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   14px;
+  --radius-full: 9999px;
+}
+
+[data-theme='dark'] {
+  --bg:          #14110d;
+  --surface:     #1d1915;
+  --surface-2:   #18140f;
+  --surface-3:   #272119;
+  --ink:         #f5efe3;
+  --ink-2:       #a9a092;
+  --ink-3:       #70685c;
+  --line:        rgba(245, 239, 227, 0.08);
+  --line-2:      rgba(245, 239, 227, 0.14);
+  --accent:      #F59E0B;
+  --accent-dk:   #FBBF24;
+  --accent-tint: #3a2a0a;
+  --accent-ink:  #FDE68A;
+  --good:        #4fb074;
+  --good-tint:   #1c3324;
+  --warn:        #e28a3d;
+  --warn-tint:   #3a2614;
+  --bad:         #d46a60;
+  --bad-tint:    #3a1e1a;
+  --info:        #6b9cdb;
+  --info-tint:   #152438;
+  --wa:          #25D366;
+  --ig:          #E1306C;
+  --ai:          #b78bff;
+  --ai-tint:     #2a1e42;
+  --shadow-sm:   0 1px 2px rgba(0,0,0,0.5), 0 0 0 1px rgba(245,239,227,0.05);
+  --shadow-md:   0 6px 24px -8px rgba(0,0,0,0.6), 0 0 0 1px rgba(245,239,227,0.06);
+  --shadow-lg:   0 18px 48px -16px rgba(0,0,0,0.7), 0 0 0 1px rgba(245,239,227,0.06);
+}
