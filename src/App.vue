@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { useToast } from 'primevue/usetoast'
 import Toast from 'primevue/toast'
 import AppShell from '@/shared/components/AppShell/AppShell.vue'
+import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
+const auth = useAuthStore()
 const isAppLayout = computed(() => route.meta.layout === 'app')
+
+onMounted(() => auth.fetchMe())
 </script>
 
 <template>

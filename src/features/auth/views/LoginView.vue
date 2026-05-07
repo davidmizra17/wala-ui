@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import WalaIcon from '@/shared/components/WalaIcon.vue'
 
 const router = useRouter()
+const auth = useAuthStore()
+
 const email = ref('')
 const password = ref('')
 
-function login() {
-  // Dummy login — navigate to dashboard
-  router.push({ name: 'dashboard' })
+async function login() {
+  const ok = await auth.login(email.value, password.value)
+  if (ok) router.push({ name: 'dashboard' })
 }
 </script>
 
@@ -36,7 +39,10 @@ function login() {
           <label class="field__label" for="password">Contraseña</label>
           <input id="password" v-model="password" type="password" class="field__input" placeholder="••••••••" required />
         </div>
-        <button type="submit" class="btn-primary">Iniciar sesión</button>
+        <p v-if="auth.error" class="login-error">{{ auth.error }}</p>
+        <button type="submit" class="btn-primary" :disabled="auth.loading">
+          {{ auth.loading ? 'Iniciando sesión…' : 'Iniciar sesión' }}
+        </button>
       </form>
     </div>
   </div>
@@ -105,4 +111,6 @@ function login() {
   transition: background 0.15s;
 }
 .btn-primary:hover { background: var(--accent-dk); }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+.login-error { font-size: 13px; color: var(--bad); margin: 0; }
 </style>
