@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useContactsStore } from '../stores/contacts'
 import ContactListItem from '../components/ContactListItem.vue'
 import ContactDetail from '../components/ContactDetail.vue'
@@ -17,6 +17,8 @@ const displayList = computed(() => {
   if (activeFilter.value === 'Todos') return base
   return base.filter(c => c.tags.includes(activeFilter.value))
 })
+
+onMounted(() => store.fetchContacts())
 </script>
 
 <template>
