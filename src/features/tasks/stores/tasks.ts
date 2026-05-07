@@ -1,32 +1,124 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { api } from '@/shared/api'
 import type { Task } from '../types'
+import type { UUID } from '@/shared/types'
 
-const DUMMY: Task[] = [
-  { id:'t1', deal:'d4', title:'Enviar catálogo a BBVA Empresas',          subtitle:'Rodrigo Ibarra', deal_label:'BBVA · $1,200', due_date:'2026-04-20', due_display:'hace 2 días', assigned_to:'u1', assignee_initials:'AL', is_done:false, overdue:true,  priority:'high', channel:'wa',  created:'2026-04-18T10:00:00Z', modified:'2026-04-22T09:00:00Z' },
-  { id:'t2', deal:'d6', title:'Confirmar paleta de colores — Boda Mariana', subtitle:'Mariana Flores', deal_label:'Boda · $2,800', due_date:'2026-04-21', due_display:'hace 1 día',  assigned_to:'u2', assignee_initials:'MC', is_done:false, overdue:true,  priority:'high', channel:'wa',  created:'2026-04-18T10:00:00Z', modified:'2026-04-22T09:00:00Z' },
-  { id:'t3', deal:'d7', title:'Cotizar arreglos para funeral',              subtitle:'Reyes',          deal_label:'',             due_date:'2026-04-21', due_display:'ayer',          assigned_to:'u3', assignee_initials:'SR', is_done:false, overdue:true,  priority:'med',  channel:'wa',  created:'2026-04-19T10:00:00Z', modified:'2026-04-22T09:00:00Z' },
-  { id:'t4', deal:'d1', title:'Llamar a Carolina Pérez sobre su boda',     subtitle:'Carolina Pérez', deal_label:'$45 → $2,800?', due_date:'2026-04-22', due_display:'3:00 PM',       assigned_to:'u1', assignee_initials:'AL', is_done:false, overdue:false, priority:'high', channel:'wa',  created:'2026-04-20T10:00:00Z', modified:'2026-04-22T09:00:00Z' },
-  { id:'t5', deal:'d7', title:'Revisar propuesta de Bancamiga',             subtitle:'Evento corp.',   deal_label:'Bancamiga · $1,420', due_date:'2026-04-22', due_display:'5:00 PM', assigned_to:'u2', assignee_initials:'MC', is_done:false, overdue:false, priority:'med',  channel:'wa',  created:'2026-04-20T10:00:00Z', modified:'2026-04-22T09:00:00Z' },
-  { id:'t6', deal:'d8', title:'Preparar muestra — 15 años Valeria',        subtitle:'Valeria G.',     deal_label:'',             due_date:'2026-04-22', due_display:'6:00 PM',       assigned_to:'u3', assignee_initials:'MT', is_done:false, overdue:false, priority:'low',  channel:'ig',  created:'2026-04-20T10:00:00Z', modified:'2026-04-22T09:00:00Z' },
-  { id:'t7', deal:'d2', title:'Enviar confirmación a Luis Meléndez',       subtitle:'Luis Meléndez',  deal_label:'$340',         due_date:'2026-04-22', due_display:'hecho 10:12',   assigned_to:'u1', assignee_initials:'AL', is_done:true,  overdue:false, priority:'low',  channel:'wa',  created:'2026-04-20T10:00:00Z', modified:'2026-04-22T10:12:00Z' },
-  { id:'t8', deal:'d3', title:'Llamar a Andreína para cierre',             subtitle:'Andreína Silva', deal_label:'',             due_date:'2026-04-23', due_display:'mañana',        assigned_to:'u3', assignee_initials:'SR', is_done:false, overdue:false, priority:'low',  channel:'ig',  created:'2026-04-20T10:00:00Z', modified:'2026-04-22T09:00:00Z' },
-  { id:'t9', deal:'d4', title:'Enviar muestras a Bancamiga',               subtitle:'Bancamiga',      deal_label:'B2B',          due_date:'2026-04-25', due_display:'en 3 días',     assigned_to:'u1', assignee_initials:'AL', is_done:false, overdue:false, priority:'low',  channel:'wa',  created:'2026-04-20T10:00:00Z', modified:'2026-04-22T09:00:00Z' },
-  { id:'t10',deal:null, title:'Seguimiento campaña Día de la Madre',       subtitle:'48 clientes',    deal_label:'',             due_date:'2026-05-04', due_display:'May 04',        assigned_to:'u2', assignee_initials:'MC', is_done:false, overdue:false, priority:'low',  channel:undefined, created:'2026-04-20T10:00:00Z', modified:'2026-04-22T09:00:00Z' },
-]
+interface ApiTask {
+  id: UUID
+  deal: UUID | null
+  title: string
+  due_date: string | null
+  assigned_to: UUID | null
+  is_done: boolean
+  created: string
+}
+
+function todayStr(): string {
+  return new Date().toISOString().split('T')[0]
+}
+
+function isOverdue(due_date: string | null): boolean {
+  return !!due_date && due_date < todayStr()
+}
+
+function isToday(due_date: string | null): boolean {
+  return due_date === todayStr()
+}
+
+function formatDueDisplay(due_date: string | null): string {
+  if (!due_date) return ''
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const due = new Date(due_date + 'T00:00:00')
+  const diffDays = Math.round((due.getTime() - today.getTime()) / 86400000)
+  if (diffDays < -1) return `hace ${Math.abs(diffDays)} días`
+  if (diffDays === -1) return 'ayer'
+  if (diffDays === 0) return 'hoy'
+  if (diffDays === 1) return 'mañana'
+  return due.toLocaleDateString('es', { month: 'short', day: 'numeric' })
+}
+
+function mapApiTask(t: ApiTask): Task {
+  return {
+    id: t.id,
+    deal: t.deal,
+    title: t.title,
+    due_date: t.due_date,
+    due_display: formatDueDisplay(t.due_date),
+    assigned_to: t.assigned_to,
+    assignee_initials: '',
+    is_done: t.is_done,
+    overdue: isOverdue(t.due_date),
+    created: t.created,
+    modified: t.created,
+  }
+}
 
 export const useTasksStore = defineStore('tasks', () => {
-  const tasks = ref<Task[]>(DUMMY)
+  const tasks = ref<Task[]>([])
   const activeView = ref('all')
+  const loading = ref(false)
+  const error = ref<string | null>(null)
 
-  const overdue  = computed(() => tasks.value.filter(t => t.overdue && !t.is_done))
-  const today    = computed(() => tasks.value.filter(t => !t.overdue && t.due_display.includes(':') || t.due_display.startsWith('hecho')))
-  const upcoming = computed(() => tasks.value.filter(t => !t.overdue && !t.due_display.includes(':') && !t.due_display.startsWith('hecho')))
+  const overdue  = computed(() => tasks.value.filter(t => isOverdue(t.due_date) && !t.is_done))
+  const today    = computed(() => tasks.value.filter(t => isToday(t.due_date)))
+  const upcoming = computed(() => tasks.value.filter(t => !isOverdue(t.due_date) && !isToday(t.due_date) && !t.is_done))
 
-  function toggleDone(id: string) {
-    const task = tasks.value.find(t => t.id === id)
-    if (task) task.is_done = !task.is_done
+  async function fetchTasks(dealId?: string): Promise<void> {
+    loading.value = true
+    error.value = null
+    try {
+      const path = dealId
+        ? `/api/v1/crm/tasks/?deal=${dealId}`
+        : '/api/v1/crm/tasks/'
+      const data = await api.get<ApiTask[]>(path)
+      tasks.value = data.map(mapApiTask)
+    } catch (err) {
+      error.value = 'No se pudieron cargar las tareas'
+      console.error('fetchTasks error:', err)
+    } finally {
+      loading.value = false
+    }
   }
 
-  return { tasks, activeView, overdue, today, upcoming, toggleDone }
+  async function toggleDone(id: string): Promise<void> {
+    const task = tasks.value.find(t => t.id === id)
+    if (!task) return
+    task.is_done = !task.is_done // optimistic
+    try {
+      await api.patch(`/api/v1/crm/tasks/${id}/`, { is_done: task.is_done })
+    } catch (err) {
+      task.is_done = !task.is_done // rollback
+      console.error('toggleDone error:', err)
+    }
+  }
+
+  async function createTask(payload: {
+    deal: string
+    title: string
+    due_date?: string
+    assigned_to?: string
+  }): Promise<Task | null> {
+    try {
+      const data = await api.post<ApiTask>('/api/v1/crm/tasks/', payload)
+      const task = mapApiTask(data)
+      tasks.value.push(task)
+      return task
+    } catch (err) {
+      console.error('createTask error:', err)
+      return null
+    }
+  }
+
+  async function deleteTask(id: string): Promise<void> {
+    try {
+      await api.delete(`/api/v1/crm/tasks/${id}/`)
+      tasks.value = tasks.value.filter(t => t.id !== id)
+    } catch (err) {
+      console.error('deleteTask error:', err)
+    }
+  }
+
+  return { tasks, activeView, loading, error, overdue, today, upcoming, fetchTasks, toggleDone, createTask, deleteTask }
 })
