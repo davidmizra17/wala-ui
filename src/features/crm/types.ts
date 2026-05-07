@@ -24,6 +24,7 @@ export interface Deal extends BaseEntity {
   priority?: 'high' | 'med' | 'low'
   tags?: string[]
   botSourced?: boolean
+  due_date?: string | null
 }
 
 export interface KanbanColumn {
