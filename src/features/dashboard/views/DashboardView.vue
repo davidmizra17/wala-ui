@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useDashboardStore } from '../stores/dashboard'
+import { useAuthStore } from '@/stores/auth'
 import StatCard from '../components/StatCard.vue'
 import VolumeChart from '../components/VolumeChart.vue'
 import ActivityFeed from '../components/ActivityFeed.vue'
@@ -9,6 +10,7 @@ import PipelineSummaryCard from '../components/PipelineSummaryCard.vue'
 import ByChannelCard from '../components/ByChannelCard.vue'
 
 const store = useDashboardStore()
+const auth  = useAuthStore()
 
 type Range = 'today' | '7d' | '30d'
 const selectedRange = ref<Range>('7d')
@@ -24,6 +26,29 @@ const rangeButtons: { key: Range; label: string }[] = [
   { key: '7d',    label: 'Últimos 7 días' },
   { key: '30d',   label: 'Últimos 30 días' },
 ]
+
+const greeting = computed(() => {
+  const h = new Date().getHours()
+  if (h < 12) return 'Buenos días'
+  if (h < 20) return 'Buenas tardes'
+  return 'Buenas noches'
+})
+
+const greetingName = computed(() => {
+  const email = auth.user?.email
+  if (!email) return ''
+  return ', ' + email.split('@')[0]
+})
+
+const greetingSub = computed(() => {
+  if (store.loading) return 'Cargando datos…'
+  const bot   = store.botHandled
+  const human = store.humanHandled
+  if (!bot && !human) return 'Sin actividad reciente.'
+  return `Tu bot manejó ${bot} conversaciones · ${human} con agente.`
+})
+
+onMounted(() => store.fetchDashboard())
 </script>
 
 <template>
@@ -32,8 +57,8 @@ const rangeButtons: { key: Range; label: string }[] = [
     <!-- Greeting + date range toggle -->
     <div class="dashboard__header">
       <div>
-        <h2 class="dashboard__greeting">Buenos días, María.</h2>
-        <p class="dashboard__greeting-sub">Tu bot manejó 4 conversaciones anoche. Todo en orden.</p>
+        <h2 class="dashboard__greeting">{{ greeting }}{{ greetingName }}.</h2>
+        <p class="dashboard__greeting-sub">{{ greetingSub }}</p>
       </div>
       <div class="date-toggle">
         <button
@@ -57,6 +82,7 @@ const rangeButtons: { key: Range; label: string }[] = [
       <VolumeChart
         :data="store.volumeData"
         :range-label="rangeLabel"
+        :total-messages="store.totalMessages"
         class="g-volume"
       />
       <ActivityFeed
@@ -67,10 +93,13 @@ const rangeButtons: { key: Range; label: string }[] = [
         :pct="store.botPct"
         :bot-handled="store.botHandled"
         :human-handled="store.humanHandled"
+        :avg-first-response-secs="store.avgFirstResponseSecs"
         class="g-bot"
       />
       <PipelineSummaryCard
         :stages="store.pipelineStages"
+        :total-value="store.funnelTotalValue"
+        :days="store.funnelDays"
         class="g-pipeline"
       />
       <ByChannelCard

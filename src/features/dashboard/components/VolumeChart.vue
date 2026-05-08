@@ -1,8 +1,22 @@
 <script setup lang="ts">
-const props = defineProps<{ data: number[][]; rangeLabel?: string }>()
-const days = ['L','M','M','J','V','S','D','L','M','M','J','V','S','D']
-const max = 100
-const subtitle = props.rangeLabel ?? 'Últimos 7 días'
+import { computed } from 'vue'
+import type { VolumeDay } from '../types'
+
+const props = defineProps<{ data: VolumeDay[]; rangeLabel?: string; totalMessages?: number }>()
+
+const subtitle = computed(() => props.rangeLabel ?? 'Últimos 7 días')
+
+const maxTotal = computed(() => {
+  if (!props.data.length) return 1
+  return Math.max(...props.data.map(d => d.bot + d.human))
+})
+
+const totalFormatted = computed(() => {
+  const total = props.totalMessages ?? props.data.reduce((s, d) => s + d.bot + d.human, 0)
+  return total.toLocaleString('en-US')
+})
+
+const BAR_HEIGHT = 160
 </script>
 
 <template>
@@ -10,7 +24,7 @@ const subtitle = props.rangeLabel ?? 'Últimos 7 días'
     <div class="volume-chart__header">
       <div>
         <div class="volume-chart__title">Volumen de mensajes</div>
-        <div class="volume-chart__sub">{{ subtitle }} · 1,284 mensajes</div>
+        <div class="volume-chart__sub">{{ subtitle }} · {{ totalFormatted }} mensajes</div>
       </div>
       <div class="volume-chart__legend">
         <span class="legend-item"><span class="legend-dot legend-dot--accent" />Atendido por bot</span>
@@ -19,12 +33,16 @@ const subtitle = props.rangeLabel ?? 'Últimos 7 días'
     </div>
     <div class="volume-chart__bars">
       <div v-for="(d, i) in data" :key="i" class="bar-col">
-        <div class="bar-stack" :style="{ height: `${((d[0]+d[1])/max)*160}px` }">
-          <div class="bar-segment bar-segment--human" :style="{ flex: d[1] }"/>
-          <div class="bar-segment bar-segment--bot"   :style="{ flex: d[0] }"/>
+        <div
+          class="bar-stack"
+          :style="{ height: `${((d.bot + d.human) / maxTotal) * BAR_HEIGHT}px` }"
+        >
+          <div class="bar-segment bar-segment--human" :style="{ flex: d.human }" />
+          <div class="bar-segment bar-segment--bot"   :style="{ flex: d.bot }" />
         </div>
-        <span class="bar-label">{{ days[i] }}</span>
+        <span class="bar-label">{{ d.weekday }}</span>
       </div>
+      <div v-if="!data.length" class="volume-chart__empty">Sin datos</div>
     </div>
   </div>
 </template>
@@ -40,6 +58,7 @@ const subtitle = props.rangeLabel ?? 'Últimos 7 días'
 .legend-dot--accent { background: var(--accent); }
 .legend-dot--muted  { background: var(--surface-3); }
 .volume-chart__bars { display: flex; align-items: flex-end; gap: 6px; height: 160px; }
+.volume-chart__empty { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 13px; color: var(--ink-3); }
 .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .bar-stack { width: 100%; display: flex; flex-direction: column; justify-content: flex-end; border-radius: 4px 4px 3px 3px; overflow: hidden; min-height: 4px; }
 .bar-segment { width: 100%; }

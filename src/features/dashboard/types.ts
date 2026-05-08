@@ -7,6 +7,12 @@ export interface StatCardData {
   sparkline?: number[]
 }
 
+export interface VolumeDay {
+  weekday: string
+  bot: number
+  human: number
+}
+
 export interface ActivityItem {
   type: 'bot' | 'won' | 'human' | 'new'
   who: string
@@ -24,7 +30,14 @@ export interface AgentRow {
 }
 
 export interface ChannelData {
-  name: 'WhatsApp' | 'Instagram'
+  name: string
   count: number
   pct: number
+}
+
+export interface FunnelStage {
+  label: string
+  count: number
+  value: string
+  isWon?: boolean
 }

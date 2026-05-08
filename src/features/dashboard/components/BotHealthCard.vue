@@ -1,11 +1,22 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-const props = defineProps<{ pct: number; botHandled: number; humanHandled: number }>()
+const props = defineProps<{
+  pct: number
+  botHandled: number
+  humanHandled: number
+  avgFirstResponseSecs: number
+}>()
 
 const r = 38
 const circumference = computed(() => 2 * Math.PI * r)
 const dashArray = computed(() => `${(props.pct / 100) * circumference.value} ${circumference.value}`)
+
+const avgResponseDisplay = computed(() => {
+  const m = Math.floor(props.avgFirstResponseSecs / 60)
+  const s = props.avgFirstResponseSecs % 60
+  return `${m}:${String(s).padStart(2, '0')}`
+})
 </script>
 
 <template>
@@ -35,7 +46,9 @@ const dashArray = computed(() => `${(props.pct / 100) * circumference.value} ${c
         <div class="bot-health__divider"/>
         <div class="bot-stat">
           <span class="bot-stat__label" style="color: var(--ink-3)">Primera respuesta</span>
-          <span class="bot-stat__val" style="color: var(--good); font-family: var(--font-mono)">0:04</span>
+          <span class="bot-stat__val" style="color: var(--good); font-family: var(--font-mono)">
+            {{ avgResponseDisplay }}
+          </span>
         </div>
       </div>
     </div>
